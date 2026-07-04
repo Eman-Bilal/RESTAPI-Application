@@ -1,9 +1,9 @@
 package com.example.Application.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
-
 //[
 //        {
 //        "name": "Ahmed Ali",
@@ -34,9 +34,37 @@ public class UserController {
     }
 
     @PostMapping("create")
-    public List<HashMap<String, String>> create(@RequestBody HashMap<String,String> userRecord){
+    public ResponseEntity<String> create(@RequestBody HashMap<String,String> userRecord){
+
+        String name= userRecord.get("name");
+        String cnic= userRecord.get("cnic");
+        String email= userRecord.get("email");
+        String phone= userRecord.get("phone");
+
+        if (name == null || name.trim().isEmpty() ||
+                cnic == null || cnic.trim().isEmpty() ||
+                phone == null || phone.trim().isEmpty() ||
+                email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid request: Missing required fields");
+        }
+
+        // Regex Patterns
+        String cnicRegex = "^\\d{5}-\\d{7}-\\d{1}$";
+        String phoneRegex = "^((\\+92)|(0))3\\d{9}$";
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
+        if (!cnic.matches(cnicRegex)) {
+            return ResponseEntity.badRequest().body("Invalid request: CNIC format must be XXXXX-XXXXXXX-X");
+        }
+        if (!phone.matches(phoneRegex)) {
+            return ResponseEntity.badRequest().body("Invalid request: Phone number must be a valid Pakistani mobile format");
+        }
+        if (!email.matches(emailRegex)) {
+            return ResponseEntity.badRequest().body("Invalid request: Invalid email address format");
+        }
+
         list.add(userRecord);
-        return list;
+        return ResponseEntity.ok("Valid Request");
     }
 
     @PutMapping("update/{id}")
