@@ -1,32 +1,33 @@
 package com.example.Application.controller;
 
+import com.example.Application.Model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/")
 public class UserController {
 
-    List<HashMap<String, String>> list;
+    List<User> users;
 
-    public UserController(List<HashMap<String, String>> list) {
-        this.list = list;
+    public UserController(List<User> list) {
+        this.users = list;
     }
 
     @GetMapping("getAll")
-    public List<HashMap<String, String>> getAll(){
-        return list ;
+    public List<User> getAll(){
+        return users ;
     }
 
     @PostMapping("create")
-    public ResponseEntity<String> create(@RequestBody HashMap<String,String> userRecord){
+    public ResponseEntity<String> create(@RequestBody User userRecord){
 
-        String name= userRecord.get("name");
-        String cnic= userRecord.get("cnic");
-        String email= userRecord.get("email");
-        String phone= userRecord.get("phone");
+        String name= userRecord.getName();
+        String cnic= userRecord.getCnic();
+        String email= userRecord.getEmail();
+        String phone= userRecord.getPhone();
 
         if (name == null || name.trim().isEmpty() ||
                 cnic == null || cnic.trim().isEmpty() ||
@@ -41,7 +42,7 @@ public class UserController {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
         if (!cnic.matches(cnicRegex)) {
-            return ResponseEntity.badRequest().body("Invalid request: CNIC format must be XXXXX-XXXXXXX-X");
+            return ResponseEntity.badRequest().body("Invalid request: CNIC format must be +92/03000000000");
         }
         if (!phone.matches(phoneRegex)) {
             return ResponseEntity.badRequest().body("Invalid request: Phone number must be a valid Pakistani mobile format");
@@ -50,27 +51,27 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid request: Invalid email address format");
         }
 
-        list.add(userRecord);
+        users.add(userRecord);
         return ResponseEntity.ok("Valid Request");
     }
 
     @PutMapping("update/{id}")
-    public String update(@PathVariable int id, @RequestBody HashMap<String,String> userRecord ){
-        if(id>=0 && id<=list.size()) {
-            list.set(id, userRecord);
-            return "Student Record Updated: "+ userRecord;
+    public ResponseEntity<String> update(@PathVariable int id, @RequestBody User userRecord ){
+        if(id>=0 && id<=users.size()) {
+            users.set(id, userRecord);
+            return ResponseEntity.ok("Student Record Updated: "+ userRecord);
         }
-        return "Id not Found";
+        return ResponseEntity.badRequest().body("Id not Found");
 
     }
 
     @DeleteMapping("delete/{id}")
-    public String delete(@PathVariable int id) {
-        if(id>=0 && id<=list.size()) {
-            list.remove(id);
-            return "Student deleted";
+    public ResponseEntity<String> delete(@PathVariable int id) {
+        if(id>=0 && id<=users.size()) {
+            users.remove(id);
+            return ResponseEntity.ok("Student Deleted");
         }
-        return "Invalid id";
+        return ResponseEntity.badRequest().body("Id not Found");
     }
 
 }
